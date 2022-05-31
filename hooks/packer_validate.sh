@@ -22,10 +22,13 @@ for file in "$@"; do
   else
     packer_param="-var-file=$(basename "$var_file")"
   fi
-  if ! packer validate "$packer_param" "$(basename "$file")"; then
+
+  if ! packer validate "$packer_param" "$(basename "$file")" ; then
     error=1
     echo
     echo "Failed path: $file"
+    echo "packer validate "$packer_param" "$(basename "$file")" failed"
+    echo "Working directory was: $directory"
     echo "================================"
   fi
   cd "$current_dir"
