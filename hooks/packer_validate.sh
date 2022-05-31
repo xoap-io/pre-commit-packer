@@ -10,14 +10,25 @@ if [ -z "$(command -v packer)" ]; then
 fi
 
 error=0
-
+current_dir="$(pwd)"
 for file in "$@"; do
-  if ! packer validate "$file"; then
+  file_path=$(readlink -f "$file")
+  directory=$(dirname "$file_path")
+  cd "$directory"
+  var_file=$(find "$directory" -name '*.pkrvars.hcl')
+  packer_param=""
+  if [ -z "$var_file" ]; then
+    echo "No .pkrvars.hcl file found in $directory"
+  else
+    packer_param="-var-file=$(basename "$var_file")"
+  fi
+  if ! packer validate "$packer_param" "$(basename "$file")"; then
     error=1
     echo
     echo "Failed path: $file"
     echo "================================"
   fi
+  cd "$current_dir"
 done
 
 if [[ $error -ne 0 ]]; then
